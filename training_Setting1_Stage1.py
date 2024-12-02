@@ -8,7 +8,7 @@ from torch.utils.data import Dataset,DataLoader
 from torch.autograd import Variable
 import torch.optim as optim
 
-from datasets.dataset_pairs_wRandomSample_Triplet import my_dataset,my_dataset_eval
+from datasets.dataset_pairs_wRandomSample import my_dataset,my_dataset_eval
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import CosineAnnealingLR,CosineAnnealingWarmRestarts
 from networks.Network_Stage1 import UNet
@@ -33,30 +33,29 @@ print('device ----------------------------------------:',device)
 
 parser = argparse.ArgumentParser()
 # path setting
-parser.add_argument('--experiment_name', type=str,default= "training_R1400_H500_S100K_PP2") # modify the experiments name-->modify all save path
-parser.add_argument('--unified_path', type=str,default=  '/gdata2/zhuyr/Weather/')
+parser.add_argument('--experiment_name', type=str,default= "debug") # modify the experiments name-->modify all save path
+parser.add_argument('--unified_path', type=str,default=  'experiments/')
 #parser.add_argument('--model_save_dir', type=str, default= )#required=True
-parser.add_argument('--training_in_path', type=str,default= '/gdata2/zhuyr/Weather/Data/Snow/all_trainingData/synthetic/')
-parser.add_argument('--training_gt_path', type=str,default= '/gdata2/zhuyr/Weather/Data/Snow/all_trainingData/gt/')
+parser.add_argument('--training_in_both', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/rainstreak_raindrop/')
+parser.add_argument('--training_gt_both', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/gt/')
 
-parser.add_argument('--training_in_pathRain', type=str,default= '/gdata2/zhuyr/Weather/Data/Rain/HeavyRain/Train/in_0917/')
-parser.add_argument('--training_gt_pathRain', type=str,default= '/gdata2/zhuyr/Weather/Data/Rain/HeavyRain/Train/gt_0917/')
+parser.add_argument('--training_in_pathRain', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/rainstreak/')
+parser.add_argument('--training_gt_pathRain', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/gt/')
 
-parser.add_argument('--training_in_pathRD', type=str,default= '/gdata2/zhuyr/Weather/Data/RainDrop/train/train/data/')
-parser.add_argument('--training_gt_pathRD', type=str,default= '/gdata2/zhuyr/Weather/Data/RainDrop/train/train/gt/')
+parser.add_argument('--training_in_pathRD', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/raindrop/')
+parser.add_argument('--training_gt_pathRD', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_syn/train/gt/')
 
 
-parser.add_argument('--writer_dir', type=str, default= '/ghome/zhuyr/UDC_codes/writer_logs/')
+parser.add_argument('--writer_dir', type=str, default= 'experiments/logs/')
 
-parser.add_argument('--eval_in_path_RD', type=str,default= '/gdata2/zhuyr/Weather/Data/RainDrop/test_a/test_a/data-re/')
-parser.add_argument('--eval_gt_path_RD', type=str,default= '/gdata2/zhuyr/Weather/Data/RainDrop/test_a/test_a/gt-re/')
+parser.add_argument('--eval_in_path_both', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/rainstreak_raindrop/')
+parser.add_argument('--eval_gt_path_both', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/gt/')
 
-parser.add_argument('--eval_in_path_L', type=str,default= '/gdata2/zhuyr/Weather/Data/Snow/test/Snow100K-L/synthetic/')
-parser.add_argument('--eval_gt_path_L', type=str,default= '/gdata2/zhuyr/Weather/Data/Snow/test/Snow100K-L/gt/')
+parser.add_argument('--eval_in_path_Rain', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/rainstreak/')
+parser.add_argument('--eval_gt_path_Rain', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/gt/')
 
-parser.add_argument('--eval_in_path_Rain', type=str,default= '/gdata2/zhuyr/Weather/Data/Rain/HeavyRain/Test/in/')
-parser.add_argument('--eval_gt_path_Rain', type=str,default= '/gdata2/zhuyr/Weather/Data/Rain/HeavyRain/Test/gt_re/')
-
+parser.add_argument('--eval_in_path_RD', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/raindrop/')
+parser.add_argument('--eval_gt_path_RD', type=str,default= '/home/gagagk16/Rain/Derain/Dataset/RainDS/RainDS/RainDS_real/gt/')
 
 #training setting
 parser.add_argument('--EPOCH', type=int, default= 100)
@@ -65,7 +64,7 @@ parser.add_argument('--BATCH_SIZE', type=int, default= 4)
 parser.add_argument('--Crop_patches', type=int, default= 200)
 parser.add_argument('--learning_rate', type=float, default= 0.0002)
 parser.add_argument('--print_frequency', type=int, default= 50)
-parser.add_argument('--SAVE_Inter_Results', type=bool, default= False)
+parser.add_argument('--SAVE_Inter_Results', type=bool, default= True)
 #during training
 parser.add_argument('--max_psnr', type=int, default= 10)
 parser.add_argument('--fix_sample', type=int, default= 9000)
@@ -84,9 +83,9 @@ args = parser.parse_args()
 
 
 if args.debug ==True:
-    fix_sampleA = 400
-    fix_sampleB = 400
-    fix_sampleC = 400
+    fix_sampleA = 100
+    fix_sampleB = 100   
+    fix_sampleC = 100
     print_frequency = 10
 
 else:
@@ -121,10 +120,10 @@ print("=="*50)
 def check_dataset(in_path, gt_path,name ='RD'):
     print( "Check {} pairs({}) ???: {} ".format(name,len(in_path), os.listdir(in_path)==os.listdir(gt_path)) )
 
-check_dataset(args.eval_in_path_RD,args.eval_gt_path_RD,'val-RD' )
-check_dataset(args.eval_in_path_Rain,args.eval_gt_path_Rain,'val-Rain' )
-check_dataset(args.eval_in_path_L,args.eval_gt_path_L,'val-Snow-L' )
-check_dataset(args.training_in_path,args.training_gt_path,'Train_Snow' )
+check_dataset(args.eval_in_path_RD,args.eval_gt_path_RD,'eval-RD' )
+check_dataset(args.eval_in_path_Rain,args.eval_gt_path_Rain,'eval-Rain' )
+check_dataset(args.eval_in_path_both,args.eval_gt_path_both,'eval-Both' )
+check_dataset(args.training_in_both,args.training_gt_both,'Train_Both' )
 check_dataset(args.training_in_pathRain,args.training_gt_pathRain,'Train_Rain' )
 check_dataset(args.training_in_pathRD,args.training_gt_pathRD,'Train_RD' )
 print("=="*50)
@@ -158,8 +157,8 @@ def save_imgs_for_visual(path,inputs,labels,outputs):
     torchvision.utils.save_image([inputs.cpu()[0], labels.cpu()[0], outputs.cpu()[0]], path,nrow=3, padding=0)
 
 def get_training_data(fix_sampleA= fix_sampleA, fix_sampleB= fix_sampleB,fix_sampleC= fix_sampleC, Crop_patches=args.Crop_patches):
-    rootA_in = args.training_in_path
-    rootA_label = args.training_gt_path
+    rootA_in = args.training_in_both
+    rootA_label = args.training_gt_both
     rootB_in = args.training_in_pathRain
     rootB_label = args.training_gt_pathRain
     rootC_in = args.training_in_pathRD
@@ -172,38 +171,49 @@ def get_training_data(fix_sampleA= fix_sampleA, fix_sampleB= fix_sampleB,fix_sam
 
 def get_eval_data(val_in_path=args.eval_in_path_Rain,val_gt_path =args.eval_gt_path_Rain ,trans_eval=trans_eval):
     eval_data = my_dataset_eval(
-        root_in=val_in_path, root_label =val_gt_path, transform=trans_eval,fix_sample= 500 )
+        root_in=val_in_path, root_label =val_gt_path, transform=trans_eval,fix_sample= 100 )
     eval_loader = DataLoader(dataset=eval_data, batch_size=1, num_workers= 4)
     return eval_loader
-def print_param_number(net):
+
+def print_detail(net):
     print('#generator parameters:', sum(param.numel() for param in net.parameters()))
+    dummy_input = torch.randn(1,3,args.Crop_patches,args.Crop_patches).to("cuda")
+    writer.add_graph(net, dummy_input)
+    writer.close()
 
 if __name__ == '__main__':
     net =UNet(base_channel=base_channel, num_res=num_res)
     net.to(device)
-    print_param_number(net)
+    print_detail(net)
 
     train_loader = get_training_data()
     eval_loader_RD = get_eval_data(val_in_path=args.eval_in_path_RD,val_gt_path =args.eval_gt_path_RD)
     eval_loader_Rain = get_eval_data(val_in_path=args.eval_in_path_Rain, val_gt_path=args.eval_gt_path_Rain)
-    eval_loader_L = get_eval_data(val_in_path=args.eval_in_path_L, val_gt_path =args.eval_gt_path_L)
+    eval_loader_both = get_eval_data(val_in_path=args.eval_in_path_both, val_gt_path =args.eval_gt_path_both)
 
     optimizerG = optim.Adam(net.parameters(), lr=args.learning_rate,betas=(0.9,0.999))
     scheduler = CosineAnnealingWarmRestarts(optimizerG, T_0=args.T_period,  T_mult=1) #ExponentialLR(optimizerG, gamma=0.98)
     # Losses
     loss_char= losses.CharbonnierLoss()
-    criterion_depth = losses.depth_loss()
+    criterion_depth = None
+    # criterion_depth = losses.depth_loss()
     # 1
-    #vgg = models.vgg16(pretrained=False)
+    # vgg = models.vgg16(pretrained=True)
     # 2
-    vgg = models.vgg16(pretrained=False)
-    vgg.load_state_dict(torch.load('/gdata2/zhuyr/VGG/vgg16-397923af.pth'))
-    vgg_model = vgg.features[:16]
-    vgg_model = vgg_model.to(device)
-    for param in vgg_model.parameters():
-        param.requires_grad = False
-    loss_network = LossNetwork(vgg_model)
-    loss_network.eval()
+    try:
+        vgg = models.vgg16(pretrained=False)
+        vgg.load_state_dict(torch.load('/home/gagagk16/Rain/Derain/Dataset/pre-trained/vgg16-397923af.pth'))
+        vgg_model = vgg.features[:16]
+        vgg_model = vgg_model.to(device)
+        for param in vgg_model.parameters():
+            param.requires_grad = False
+        loss_network = LossNetwork(vgg_model)
+        loss_network.eval()
+        print(f"VGG sucessfully loaded!")
+    except Exception as e:
+        print(f"VGG loading failed:{e}")
+        loss_network = None
+        
     
     
     step =0
@@ -211,7 +221,7 @@ if __name__ == '__main__':
     max_psnr_val_Rain = args.max_psnr
     max_psnr_val_S = args.max_psnr
     max_psnr_val_M = args.max_psnr
-    max_psnr_val_L = args.max_psnr
+    max_psnr_val_both = args.max_psnr
 
     total_loss = 0.0
     total_loss1 = 0.0
@@ -240,7 +250,7 @@ if __name__ == '__main__':
 
             train_output= net(inputs)
             input_PSNR = compute_psnr(inputs, labels)
-            trian_PSNR = compute_psnr(train_output, labels)
+            train_PSNR = compute_psnr(train_output, labels)
 
             loss1 = F.smooth_l1_loss(train_output, labels)
             if args.addition_loss == 'VGG':
@@ -261,7 +271,7 @@ if __name__ == '__main__':
             total_loss3 += loss3.item()
 
             input_PSNR_all += input_PSNR
-            train_PSNR_all += trian_PSNR
+            train_PSNR_all += train_PSNR
             g_loss.backward()
             optimizerG.step()
             if (i+1) % print_frequency ==0 and i >1:
@@ -270,7 +280,7 @@ if __name__ == '__main__':
                 print(
                     "epoch:%d,[%d / %d], [lr: %.7f ],[loss:%.5f,loss1:%.5f,loss2:%.5f,loss3:%.5f, avg_loss:%.5f],[in_PSNR: %.3f, out_PSNR: %.3f],time:%.3f" %
                     (epoch, i + 1, len(train_loader), optimizerG.param_groups[0]["lr"], g_loss.item(), loss1.item(),
-                     loss2.item(), loss3.item(), total_loss / iter_nums, input_PSNR, trian_PSNR, time.time() - st))
+                     loss2.item(), loss3.item(), total_loss / iter_nums, input_PSNR, train_PSNR, time.time() - st))
                 st = time.time()
 
             if args.SAVE_Inter_Results:
@@ -281,5 +291,7 @@ if __name__ == '__main__':
                    SAVE_PATH  + 'net_epoch_{}.pth'.format(epoch))
 
         max_psnr_val_RD = test(net= net,eval_loader = eval_loader_RD,epoch=epoch,max_psnr_val = max_psnr_val_RD, Dname = 'RD')
-        max_psnr_val_Rain = test(net=net, eval_loader = eval_loader_Rain, epoch=epoch, max_psnr_val=max_psnr_val_Rain, Dname='HRain')
-        max_psnr_val_L = test(net=net, eval_loader=eval_loader_L, epoch=epoch, max_psnr_val=max_psnr_val_L, Dname='L')
+        max_psnr_val_Rain = test(net=net, eval_loader = eval_loader_Rain, epoch=epoch, max_psnr_val=max_psnr_val_Rain, Dname='Rainstreak')
+        max_psnr_val_both = test(net=net, eval_loader=eval_loader_both, epoch=epoch, max_psnr_val=max_psnr_val_both, Dname='Both')
+
+        print("=="*50)

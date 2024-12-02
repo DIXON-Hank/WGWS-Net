@@ -70,14 +70,13 @@ class my_dataset(Dataset):
     def read_imgs_pair(self,in_path, gt_path, transform, crop_size):
         in_img_path_A = in_path  #
         img_name_A = in_img_path_A.split('/')[-1]
-
-        in_img_A = np.array(Image.open(in_img_path_A))
+        in_img_A = np.array(Image.open(in_img_path_A).convert('RGB'))
         gt_img_path_A = gt_path  # self.imgs_gt_A[index]
-
-        gt_img_A = np.array(Image.open(gt_img_path_A))
+        gt_img_A = np.array(Image.open(gt_img_path_A).convert('RGB'))
         data_IN_A, data_GT_A = transform(in_img_A, gt_img_A, crop_size)
 
         return data_IN_A, data_GT_A, img_name_A
+    
     def augment_img(self, img, mode=0):
         """图片随机旋转"""
         if mode == 0:
@@ -97,7 +96,7 @@ class my_dataset(Dataset):
         elif mode == 7:
             return np.flipud(np.flipud(np.rot90(img, k=3)))
 
-    def train_transform(self, img, label,patch_size=256):
+    def train_transform(self, img, label,patch_size=256): #TODO:see how this works
         """对图片和标签做一些数值处理"""
         ih, iw,_ = img.shape
 
@@ -131,26 +130,27 @@ class my_dataset(Dataset):
 class my_dataset_eval(Dataset):
     def __init__(self,root_in,root_label,transform =None,fix_sample=100):
         super(my_dataset_eval,self).__init__()
-        #in_imgs
-
+        #input
         self.fix_sample = fix_sample
-        in_files = os.listdir(root_in)
+        in_files = [f for f in os.listdir(root_in) if f.endswith(('.png', '.jpg', '.jpeg'))]
         if self.fix_sample > len(in_files):
             self.fix_sample = len(in_files)
         in_files = random.sample(in_files, self.fix_sample)
         self.imgs_in = [os.path.join(root_in, k) for k in in_files]
-        #gt_imgs
+        
+        #gt
         #gt_files = os.listdir(root_label)
         self.imgs_gt = [os.path.join(root_label, k) for k in in_files]
 
         self.transform = transform
+        
     def __getitem__(self, index):
         in_img_path = self.imgs_in[index]
         img_name =in_img_path.split('/')[-1]
 
-        in_img = Image.open(in_img_path)
+        in_img = Image.open(in_img_path).convert('RGB')
         gt_img_path = self.imgs_gt[index]
-        gt_img = Image.open(gt_img_path)
+        gt_img = Image.open(gt_img_path).convert('RGB')
         trans_eval = transforms.Compose(
             [
                 transforms.ToTensor()
@@ -174,10 +174,11 @@ class DatasetForInference(Dataset):
     def __init__(self, dir_path):
         self.image_paths =  glob.glob( os.path.join(dir_path, '*') )
         self.transform = transforms.Compose([
-            transforms.Resize([128, 128]),
-            #transforms.CenterCrop(224),
+            #transforms.Resize([256,256]),
+            transforms.CenterCrop(256),
             transforms.ToTensor(),
         ]) #transforms.ToTensor()
+
     def __len__(self):
         return len(self.image_paths)
 
@@ -188,7 +189,7 @@ class DatasetForInference(Dataset):
         _, h, w = input_image.shape
         if (h%16 != 0) or (w%16 != 0):
             input_image = transforms.Resize(((h//16)*16, (w//16)*16))(input_image)
-        return input_image #, os.path.basename(input_path)
+        return input_image, os.path.basename(input_path)
 
 
 if __name__ == '__main__':

@@ -153,24 +153,24 @@ if __name__ == '__main__':
     
         
     # Datasets of Setting1
-    eval_loader_Haze = get_eval_data(val_in_path=args.eval_in_path_Haze, val_gt_path=args.eval_gt_path_Haze)
-    eval_loader_L = get_eval_data(val_in_path=args.eval_in_path_L, val_gt_path=args.eval_gt_path_L)
-    eval_loader_Rain = get_eval_data(val_in_path=args.eval_in_path_Rain, val_gt_path=args.eval_gt_path_Rain)
+    # eval_loader_Haze = get_eval_data(val_in_path=args.eval_in_path_Haze, val_gt_path=args.eval_gt_path_Haze)
+    # eval_loader_L = get_eval_data(val_in_path=args.eval_in_path_L, val_gt_path=args.eval_gt_path_L)
+    # eval_loader_Rain = get_eval_data(val_in_path=args.eval_in_path_Rain, val_gt_path=args.eval_gt_path_Rain)
     #Datasets of Real-world Scenes
-    eval_loader_RealRain = get_eval_data(val_in_path=args.eval_in_path_realRain, val_gt_path=args.eval_in_path_realRain)
-    eval_loader_RealSnow = get_eval_data(val_in_path=args.eval_in_path_realSnow, val_gt_path=args.eval_in_path_realSnow)
+    # eval_loader_RealRain = get_eval_data(val_in_path=args.eval_in_path_realRain, val_gt_path=args.eval_in_path_realRain)
+    # eval_loader_RealSnow = get_eval_data(val_in_path=args.eval_in_path_realSnow, val_gt_path=args.eval_in_path_realSnow)
     eval_loader_RealRainDrop = get_eval_data(val_in_path=args.eval_in_path_realRainDrop, val_gt_path=args.eval_gt_path_realRainDrop)
 
 
     # RainDrop
-    test(net=net, eval_loader = eval_loader_Haze, Dname= 'RD',flag = [0,0,1],model_flag= args.flag)
+    # test(net=net, eval_loader = eval_loader_Haze, Dname= 'RD',flag = [0,0,1],model_flag= args.flag)
     # OutDoor-Rain
-    test(net=net, eval_loader = eval_loader_Rain, Dname= 'HRain',flag = [0,1,0],model_flag= args.flag)
+    # test(net=net, eval_loader = eval_loader_Rain, Dname= 'HRain',flag = [0,1,0],model_flag= args.flag)
     # Snow
     #test(net=net, eval_loader = eval_loader_L,  Dname= 'L',flag = [1,0,0],model_flag= args.flag)
     
     # test(net=net, eval_loader = eval_loader_RealSnow, Dname= 'RealSnow',flag = [1,0,0],model_flag= args.flag)
     # test(net=net, eval_loader = eval_loader_RealRain,Dname= 'RealRain',flag = [0,1,0],model_flag= args.flag)
-    # test(net=net, eval_loader = eval_loader_RealRainDrop,Dname= 'RealRainDrop',flag = [0,0,1],model_flag= args.flag)
+    test(net=net, eval_loader = eval_loader_RealRainDrop,Dname= 'RealRainDrop',flag = [0,0,1],model_flag= args.flag)
 
 
